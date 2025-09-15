@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: oidc-demo
+
+  security:
+    oauth2:
+      client:
+        registration:
+          # Google OIDC Settings
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            scope:
+              - openid      # OIDC is essential!
+              - profile
+              - email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            client-name: Google OIDC
+
+        provider:
+          google:
+            # OIDC Discovery Endpoint
+            issuer-uri: https://accounts.google.com
+            user-name-attribute: sub
+
+# Logging Settings
+logging:
+  level:
+    org.springframework.security.oauth2: DEBUG
+    com.example.oidc: DEBUG
+    org.springframework.security.oauth2.client.oidc: TRACE
+
+server:
+  port: 8080
