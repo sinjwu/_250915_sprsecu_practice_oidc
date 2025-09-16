@@ -8,8 +8,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import java.io.IOException;
@@ -31,5 +34,33 @@ public class SecurityConfig {
                 response.sendRedirect("/dashboard");
             }
         };
+    }
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(
+                        auth -> auth
+                                .requestMatchers("/", "/login", "/error", "/favicon.ico").permitAll()
+                                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                                .requestMatchers("/api/id-token/**").authenticated()
+                                .anyRequest().authenticated()
+                )
+                .oauth2Login(
+                        oauth2 -> oauth2
+                                .loginPage("/login")
+                                .userInfoEndpoint(userInfo -> userInfo.oidcUserService(customOidcUserService))
+                                .successHandler(oidcAuthenticationSuccessHandler())
+                                .failureUrl("/login?error=true")
+                )
+                .logout(
+                        logout -> logout
+                                .logoutUrl("/logout")
+                                .logoutSuccessUrl("/")
+                                .invalidateHttpSession(true)
+                                .clearAuthentication(true)
+                                .deleteCookies("JSESSIONID")
+                )
+                .build();
     }
 }

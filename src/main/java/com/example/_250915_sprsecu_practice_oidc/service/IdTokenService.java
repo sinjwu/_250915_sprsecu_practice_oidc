@@ -28,7 +28,7 @@ public class IdTokenService {
                 log.warn("ID Token의 audience가 일치하지 않음: expected={}, actual={}", expectedClientId, idToken.getAudience());
                 return false;
             }
-            if (!"http://accounts.google.com".equals(idToken.getIssuer().toString())) {
+            if (!"https://accounts.google.com".equals(idToken.getIssuer().toString())) {
                 log.warn("ID Token의 issuer가 일치하지 않음: {}", idToken.getIssuer());
                 return false;
             }
